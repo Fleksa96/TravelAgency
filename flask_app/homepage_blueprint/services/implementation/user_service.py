@@ -2,7 +2,7 @@ from flask_app.homepage_blueprint.services.user_abstract_service import \
     UserAbstractService
 from data_layer import UserDao
 
-#daos
+# daos
 user_dao = UserDao()
 
 

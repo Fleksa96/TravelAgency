@@ -7,3 +7,7 @@ class UserAbstractService(object):
     @abstractmethod
     def create_new_tourist(self, user):
         raise NotImplementedError()
+
+    @abstractmethod
+    def login_user(self, user):
+        raise NotImplementedError()

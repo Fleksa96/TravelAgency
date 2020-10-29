@@ -1,1 +1,2 @@
-from .arrangement import CreateArrangementSchema, GetArrangementSchema
+from .arrangement import CreateArrangementSchema, GetArrangementSchema, \
+    DeleteArrangementSchema

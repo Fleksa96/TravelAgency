@@ -7,20 +7,20 @@ from flask_app.homepage_blueprint.schemas import \
 from flask_app.homepage_blueprint.services import \
     UserService, ArrangementService
 
-#schemas
+# schemas
 create_user_schema = CreateUserSchema()
 user_schema = UserSchema()
 user_login_schema = UserLoginSchema()
 
-#services
+# services
 user_service = UserService()
 arrangement_service = ArrangementService()
+
 
 @homepage_api.route('')
 class GetArrangement(Resource):
     def get(self):
         data = arrangement_service.get_all_arrangements()
-        print(data)
         arrangements = GetArrangementSchema(many=True).dump(data)
         return arrangements
 

@@ -10,6 +10,10 @@ arrangement_dao = ArrangementDao()
 
 class ArrangementService(ArrangementAbstractService):
 
+    def delete_arrangement(self, data):
+        message = arrangement_dao.delete_arrangement(data=data)
+        return message
+
     def create_arrangement(self, data):
         arrangement = arrangement_dao.create_arrangement(data=data)
         return arrangement

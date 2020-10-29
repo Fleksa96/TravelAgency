@@ -22,5 +22,4 @@ def create_app(config):
     return app
 
 
-from flask_app.homepage_blueprint.models import User
-from data_layer.models import Arrangement
+from data_layer.models import Arrangement, User

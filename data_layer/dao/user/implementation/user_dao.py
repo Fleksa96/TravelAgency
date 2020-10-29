@@ -1,9 +1,8 @@
 from sqlalchemy.exc import SQLAlchemyError
 
 from data_layer.dao.user.user_abstract_dao import UserAbstractDao
-from data_layer.models.arrangement import Arrangement
 from flask_app import db
-from flask_app.homepage_blueprint.models.user import User
+from data_layer.models.user import User
 
 
 class UserDao(UserAbstractDao):

@@ -21,4 +21,8 @@ class CreateArrangementSchema(Schema):
     price = fields.Float(required=True)
     free_places = fields.Integer(required=True)
     admin_id = fields.Integer(required=True)
-    tourist_guide_id = fields.Integer(required=True)
+    tourist_guide_id = fields.Integer(default=None)
+
+
+class DeleteArrangementSchema(Schema):
+    id = fields.Integer(required=True)
