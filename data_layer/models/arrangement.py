@@ -4,12 +4,13 @@ from sqlalchemy import (Column,
                         Date,
                         Float,
                         ForeignKey)
+
 from flask_app import db
 from sqlalchemy.orm import relationship
 
 
 class Arrangement(db.Model):
-    __tablename__='arrangement'
+    __tablename__ = 'arrangement'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     start_date = Column(Date, nullable=False)
@@ -24,7 +25,7 @@ class Arrangement(db.Model):
     admin = relationship(
         'User',
         foreign_keys=[admin_id],
-        backref='arrangements'
+        backref='admin_arrangements'
     )
 
     tourist_guide = relationship(
@@ -42,9 +43,7 @@ class Arrangement(db.Model):
                  price=None,
                  free_places=None,
                  admin_id=None,
-                 tourist_guide_id=None,
-                 admin=None,
-                 tourist_guide=None
+                 tourist_guide_id=None
                  ):
         self.id = id
         self.start_date = start_date
@@ -55,5 +54,3 @@ class Arrangement(db.Model):
         self.free_places = free_places
         self.admin_id = admin_id
         self.tourist_guide_id = tourist_guide_id
-        self.admin = admin
-        self.tourist_guide = tourist_guide

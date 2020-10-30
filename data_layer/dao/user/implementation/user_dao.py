@@ -16,17 +16,22 @@ class UserDao(UserAbstractDao):
             email=user['email']
         )
 
-        try:
-            db.session.add(new_user)
-            db.session.commit()
-        except SQLAlchemyError as sqlalchemy_error:
-            print(f"SqlAlchemy error:: {sqlalchemy_error}")
-            return {'message': {sqlalchemy_error}}, 500
-        except Exception as error:
-            print(f"Unknown error:: {error}")
-            return {'message': 'Unknown error.'}, 500
+        db.session.add(new_user)
+        db.session.commit()
 
         return new_user
+
+    def get_user_by_username(self, username):
+        data = db.session.query(User).\
+            filter(User.username == username).\
+            one_or_none()
+        return data
+
+    def get_user_by_email(self, email):
+        data = db.session.query(User).\
+            filter(User.email == email).\
+            one_or_none()
+        return data
 
     def check_identity(self, data):
         user = db.session.query(User).\

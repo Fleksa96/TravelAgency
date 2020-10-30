@@ -11,3 +11,7 @@ class UserAbstractDao(object):
     @abstractmethod
     def check_identity(self, data):
         raise NotImplementedError()
+
+    @abstractmethod
+    def get_user_by_username(self, username):
+        raise NotImplementedError()

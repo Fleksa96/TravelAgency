@@ -15,3 +15,7 @@ class ArrangementAbstractDao(object):
     @abstractmethod
     def delete_arrangement(self, data):
         raise NotImplementedError()
+
+    @abstractmethod
+    def send_email_of_cancellation(self, data):
+        raise NotImplementedError()
