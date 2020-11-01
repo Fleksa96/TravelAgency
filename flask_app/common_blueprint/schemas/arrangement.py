@@ -1,4 +1,6 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validates, validates_schema
+from werkzeug.exceptions import Conflict
+from datetime import date
 
 
 class GetArrangementSchema(Schema):
@@ -13,6 +15,25 @@ class GetArrangementSchema(Schema):
     tourist_guide_id = fields.Integer(required=True)
 
 
+class UpdateArrangementSchema(Schema):
+    start_date = fields.Date()
+    end_date = fields.Date()
+    price = fields.Float()
+    free_places = fields.Integer()
+    tourist_guide_id = fields.Integer()
+
+    # @validates('start_date')
+    # def check_if_start_date_is_in_future(self, start_date):
+    #     if start_date and start_date < date.today():
+    #         raise Conflict(description='Start date is in past')
+
+    # @validates_schema
+    # def validate_numbers(self, data, **kwargs):
+    #     if data["end_date"] < data["start_date"]:
+    #         raise Conflict(description='End date is before ' \
+    #                                    'start date')
+
+
 class CreateArrangementSchema(Schema):
     start_date = fields.Date(required=True)
     end_date = fields.Date(required=True)
@@ -23,3 +44,13 @@ class CreateArrangementSchema(Schema):
     admin_id = fields.Integer(required=True)
     tourist_guide_id = fields.Integer()
 
+    @validates('start_date')
+    def check_if_start_date_is_in_future(self, start_date):
+        if start_date < date.today():
+            raise Conflict(description='Start date is in past')
+
+    @validates_schema
+    def validate_numbers(self, data, **kwargs):
+        if data["end_date"] < data["start_date"]:
+            raise Conflict(description='End date is before ' \
+                                       'start date')

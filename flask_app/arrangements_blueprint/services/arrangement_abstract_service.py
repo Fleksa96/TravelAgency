@@ -9,6 +9,10 @@ class ArrangementAbstractService(object):
         raise NotImplementedError()
 
     @abstractmethod
+    def update_arrangement(self, data):
+        raise NotImplementedError()
+
+    @abstractmethod
     def delete_arrangement(self, data):
         raise NotImplementedError()
 

@@ -6,11 +6,12 @@ from flask_app.arrangements_blueprint import arrangements_api
 from flask_app.arrangements_blueprint.services \
     import ArrangementService
 from flask_app.common_blueprint.schemas import \
-    CreateArrangementSchema, GetArrangementSchema
+    CreateArrangementSchema, GetArrangementSchema, UpdateArrangementSchema
 
 # schemas
 create_arrangement_schema = CreateArrangementSchema()
 get_arrangement_schema = GetArrangementSchema()
+update_arrangement_schema = UpdateArrangementSchema()
 
 # services
 arrangement_service = ArrangementService()
@@ -31,8 +32,17 @@ class ArrangementApi(Resource):
 
 
 @arrangements_api.route('/<int:id>')
-class DeleteArrangement(Resource):
+class ArrangementApiId(Resource):
     # @login_required
     def delete(self, id):
-        message = arrangement_service.delete_arrangement(data=id)
+        message = arrangement_service.delete_arrangement(arrangement_id=id)
         return message
+
+    # @login_required
+    def patch(self, id):
+        post_data = update_arrangement_schema.load(request.json)
+        arrangement = arrangement_service.update_arrangement(
+            data=post_data,
+            id=id
+        )
+        return get_arrangement_schema.dump(arrangement)

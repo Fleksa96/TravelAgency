@@ -1,8 +1,16 @@
+from werkzeug.exceptions import Conflict
+
+from flask_mail import Message
+
+from datetime import date
+
+from flask_app import mail
 from flask_app.arrangements_blueprint.services.arrangement_abstract_service \
     import ArrangementAbstractService
 
 from data_layer.dao.arrangement.implementation.arrangement_dao \
     import ArrangementDao
+from data_layer.models import Arrangement
 
 # daos
 arrangement_dao = ArrangementDao()
@@ -10,15 +18,72 @@ arrangement_dao = ArrangementDao()
 
 class ArrangementService(ArrangementAbstractService):
 
+    @staticmethod
+    def _check_if_arrangement_exist(arrangement_id):
+        arrangement = arrangement_dao. \
+            get_arrangement_by_id(arrangement_id=arrangement_id)
+        if not arrangement:
+            raise Conflict(description='Arrangement does not exist!')
+        return arrangement
+
+    @staticmethod
+    def _send_email_of_cancellation(arrangement_id):
+        users = arrangement_dao. \
+            get_users_from_reservation(arrangement_id=arrangement_id)
+        if len(users) > 0:
+            msg = Message('Cancellation',
+                          sender='lovacportal.podrska@gmail.com',
+                          recipients=[u.User.email for u in users])
+
+            msg.body = f'You arrangement {users[0].destination} ' \
+                       f'has been cancelled.'
+            mail.send(msg)
+
     def get_all_arrangements(self):
         data = arrangement_dao.get_all_arrangements()
         return data
 
-    def delete_arrangement(self, data):
-        arrangement_dao.send_email_of_cancellation(data=data)
-        message = arrangement_dao.delete_arrangement(data=data)
+    def delete_arrangement(self, arrangement_id):
+        self._check_if_arrangement_exist(arrangement_id=arrangement_id)
+        self._send_email_of_cancellation(arrangement_id=arrangement_id)
+        message = arrangement_dao. \
+            delete_arrangement(arrangement_id=arrangement_id)
         return message
 
     def create_arrangement(self, data):
-        arrangement = arrangement_dao.create_arrangement(data=data)
+        new_arrangement = Arrangement(
+            start_date=data.get('start_date'),
+            end_date=data.get('end_date'),
+            description=data.get('description'),
+            destination=data.get('destination'),
+            price=data.get('price'),
+            free_places=data.get('free_places'),
+            admin_id=data.get('admin_id'),
+            tourist_guide_id=data.get('tourist_guide_id')
+        )
+        arrangement = arrangement_dao. \
+            create_arrangement(new_arrangement=new_arrangement)
+        return arrangement
+
+    def update_arrangement(self, id, data):
+        arrangement = self._check_if_arrangement_exist(id)
+
+        if data.get('start_date'):
+            arrangement.start_date = data.get('start_date')
+
+        if data.get('end_date'):
+            arrangement.end_date = data.get('end_date')
+
+        if data.get('tourist_guide_id'):
+            arrangement.tourist_guide_id = data.get('tourist_guide_id')
+
+        if data.get('free_places'):
+            arrangement.free_places = data.get('free_places')
+
+        if data.get('price'):
+            arrangement.price = data.get('price')
+
+        arrangement = arrangement_dao. \
+            update_arrangement(arrangement=arrangement, id=id)
+
         return arrangement

@@ -5,7 +5,7 @@ class UserAbstractDao(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def create_user(self, user):
+    def create_user(self, new_user):
         raise NotImplementedError()
 
     @abstractmethod
@@ -14,4 +14,7 @@ class UserAbstractDao(object):
 
     @abstractmethod
     def get_user_by_username(self, username):
+        raise NotImplementedError()
+
+    def get_user_by_email(self, email):
         raise NotImplementedError()

@@ -1,9 +1,9 @@
 from flask_restplus import Resource
 from flask import request
 
+
 from flask_app.common_blueprint.schemas import \
-    CreateUserSchema, UserSchema, UserLoginSchema, \
-    GetArrangementSchema
+    CreateUserSchema, UserSchema, UserLoginSchema
 
 from flask_app.users_blueprint import users_api
 from flask_app.users_blueprint.services import \
@@ -22,8 +22,8 @@ user_service = UserService()
 class UserRegistration(Resource):
     def post(self):
         post_data = create_user_schema.load(request.json)
-        new_user = user_service.create_new_tourist(user=post_data)
-        return user_schema.dump(new_user)
+        user = user_service.create_new_tourist(post_data=post_data)
+        return user_schema.dump(user)
 
 
 @users_api.route('/login')

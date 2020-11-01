@@ -5,7 +5,7 @@ class UserAbstractService(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def create_new_tourist(self, user):
+    def create_new_tourist(self, new_user):
         raise NotImplementedError()
 
     @abstractmethod
