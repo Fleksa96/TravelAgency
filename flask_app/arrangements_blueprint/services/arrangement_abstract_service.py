@@ -19,3 +19,11 @@ class ArrangementAbstractService(object):
     @abstractmethod
     def get_all_arrangements(self):
         raise NotImplementedError()
+
+    @abstractmethod
+    def get_arrangement_by_id(self, arrangement_id):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_arrangements_without_guide(self):
+        raise NotImplementedError()

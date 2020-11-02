@@ -20,7 +20,7 @@ class Arrangement(db.Model):
     price = Column(Float, nullable=False)
     free_places = Column(Integer, nullable=False)
     admin_id = Column(Integer, ForeignKey('user.id'))
-    tourist_guide_id = Column(Integer, ForeignKey('user.id'), nullable=True)
+    travel_guide_id = Column(Integer, ForeignKey('user.id'), nullable=True)
 
     admin = relationship(
         'User',
@@ -28,9 +28,9 @@ class Arrangement(db.Model):
         backref='admin_arrangements'
     )
 
-    tourist_guide = relationship(
+    travel_guide = relationship(
         'User',
-        foreign_keys=[tourist_guide_id],
+        foreign_keys=[travel_guide_id],
         backref='tour_arrangements'
     )
 
@@ -43,7 +43,7 @@ class Arrangement(db.Model):
                  price=None,
                  free_places=None,
                  admin_id=None,
-                 tourist_guide_id=None
+                 travel_guide_id=None
                  ):
         self.id = id
         self.start_date = start_date
@@ -53,4 +53,4 @@ class Arrangement(db.Model):
         self.price = price
         self.free_places = free_places
         self.admin_id = admin_id
-        self.tourist_guide_id = tourist_guide_id
+        self.travel_guide_id = travel_guide_id

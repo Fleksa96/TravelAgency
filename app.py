@@ -3,7 +3,5 @@ from config.development import Development as Conf
 
 app = create_app(Conf)
 
-
-@app.route("/")
-def hello():
-    return "HELLO WORLD!"
+if __name__ == '__main__':
+    app.run(debug=True)

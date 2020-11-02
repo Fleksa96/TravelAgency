@@ -11,3 +11,11 @@ class UserAbstractService(object):
     @abstractmethod
     def login_user(self, user):
         raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_travel_guides_without_arrangement(self, arrangement_id):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_travel_guides_with_application(self, arrangement_id):
+        raise NotImplementedError()

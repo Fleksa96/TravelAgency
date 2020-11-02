@@ -1,7 +1,7 @@
 from data_layer.dao.arrangement.arrangement_abstract_dao import \
     ArrangementAbstractDao
-from data_layer.models.arrangement import Arrangement
-from data_layer.models.user import users_arrangements, User
+
+from data_layer.models import User, Arrangement, users_arrangements
 
 from flask_app import db
 
@@ -16,6 +16,12 @@ class ArrangementDao(ArrangementAbstractDao):
             filter(users_arrangements.c.user_id == User.id). \
             all()
         return users
+
+    def get_admin_id_from_arrangement_id(self, arrangement_id):
+        arrangement = db.session.query(Arrangement). \
+                                filter(Arrangement.id == arrangement_id). \
+                                first()
+        return arrangement.admin_id
 
     def delete_arrangement(self, arrangement_id):
         db.session.query(Arrangement). \
@@ -43,9 +49,11 @@ class ArrangementDao(ArrangementAbstractDao):
         updated_arrangement = db.session.query(Arrangement). \
                                 filter(Arrangement.id == id). \
                                 first()
-
-        updated_arrangement = arrangement
-
         db.session.commit()
-
         return updated_arrangement
+
+    def get_all_arrangements_without_guide(self):
+        data = db.session.query(Arrangement). \
+            filter(Arrangement.travel_guide_id.is_(None)). \
+            all()
+        return data

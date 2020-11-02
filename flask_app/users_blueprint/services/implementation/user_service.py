@@ -2,13 +2,22 @@ from flask_app.users_blueprint.services.user_abstract_service import \
     UserAbstractService
 from data_layer import UserDao, User
 
+from flask_app.common_blueprint.services import GenericService
+
 from werkzeug.exceptions import Conflict
 
 # daos
 user_dao = UserDao()
 
 
-class UserService(UserAbstractService):
+class UserService(GenericService, UserAbstractService):
+
+    @staticmethod
+    def _check_if_arrangement_exist(arrangement_id):
+        arrangement = GenericService.check_if_arrangement_exist(
+            arrangement_id=arrangement_id
+        )
+        return arrangement
 
     @staticmethod
     def _check_if_username_is_unique(username):
@@ -62,3 +71,22 @@ class UserService(UserAbstractService):
 
         user = self._check_password_for_username(data=data)
         return user
+
+    def get_all_travel_guides_without_arrangement(self, arrangement_id):
+        arrangement = self.check_if_arrangement_exist(
+            arrangement_id=arrangement_id
+        )
+        free_guides = user_dao.get_all_travel_guides_without_any_arrangement()
+        guides = user_dao.get_all_travel_guides_with_spare_time(
+            arrangement=arrangement
+        )
+        return guides + free_guides
+
+    def get_all_travel_guides_with_application(self, arrangement_id):
+        arrangement = self.check_if_arrangement_exist(
+            arrangement_id=arrangement_id
+        )
+        guides = user_dao.get_all_travel_guides_with_application(
+            arrangement=arrangement
+        )
+        return guides

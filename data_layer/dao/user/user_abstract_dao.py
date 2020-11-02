@@ -16,5 +16,17 @@ class UserAbstractDao(object):
     def get_user_by_username(self, username):
         raise NotImplementedError()
 
+    @abstractmethod
+    def get_all_travel_guides_with_spare_time(self, arrangement):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_travel_guides_with_application(self, arrangement):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_travel_guides_without_any_arrangement(self):
+        raise NotImplementedError()
+
     def get_user_by_email(self, email):
         raise NotImplementedError()

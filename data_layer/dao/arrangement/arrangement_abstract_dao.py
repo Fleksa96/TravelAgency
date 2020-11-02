@@ -9,7 +9,15 @@ class ArrangementAbstractDao(object):
         raise NotImplementedError()
 
     @abstractmethod
+    def get_admin_id_from_arrangement_id(self, arrangement_id):
+        raise NotImplementedError()
+
+    @abstractmethod
     def get_all_arrangements(self):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_arrangements_without_guide(self):
         raise NotImplementedError()
 
     @abstractmethod

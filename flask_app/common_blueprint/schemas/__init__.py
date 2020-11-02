@@ -1,4 +1,5 @@
 from .arrangement import \
-    GetArrangementSchema, CreateArrangementSchema, UpdateArrangementSchema
-from .user import UserMinimalSchema, UserSchema, UserLoginSchema, \
+    GetArrangementSchema, CreateArrangementSchema, UpdateArrangementSchema, \
+    ArrangementMinimalSchema
+from .user import UserMinimalSchema, GetUserSchema, UserLoginSchema, \
     CreateUserSchema

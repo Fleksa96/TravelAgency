@@ -9,7 +9,7 @@ class CreateUserSchema(Schema):
     email = fields.Email(required=True)
 
 
-class UserSchema(Schema):
+class GetUserSchema(Schema):
     id = fields.Integer(required=True)
     first_name = fields.String(required=True)
     last_name = fields.String(required=True)

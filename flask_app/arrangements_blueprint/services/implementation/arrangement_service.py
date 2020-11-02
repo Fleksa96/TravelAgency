@@ -27,6 +27,14 @@ class ArrangementService(ArrangementAbstractService):
         return arrangement
 
     @staticmethod
+    def _check_if_admin_id_is_current_user_id(arrangement_id):
+        admin_id = arrangement_dao. \
+            get_arrangement_by_id(arrangement_id=arrangement_id)
+        if not admin_id:
+            raise Conflict(description='You are not authorized to '
+                                       'update this arrangement!')
+
+    @staticmethod
     def _send_email_of_cancellation(arrangement_id):
         users = arrangement_dao. \
             get_users_from_reservation(arrangement_id=arrangement_id)
@@ -38,6 +46,12 @@ class ArrangementService(ArrangementAbstractService):
             msg.body = f'You arrangement {users[0].destination} ' \
                        f'has been cancelled.'
             mail.send(msg)
+
+    def get_arrangement_by_id(self, arrangement_id):
+        arrangement = self._check_if_arrangement_exist(
+            arrangement_id=arrangement_id
+        )
+        return arrangement
 
     def get_all_arrangements(self):
         data = arrangement_dao.get_all_arrangements()
@@ -59,7 +73,7 @@ class ArrangementService(ArrangementAbstractService):
             price=data.get('price'),
             free_places=data.get('free_places'),
             admin_id=data.get('admin_id'),
-            tourist_guide_id=data.get('tourist_guide_id')
+            travel_guide_id=data.get('travel_guide_id')
         )
         arrangement = arrangement_dao. \
             create_arrangement(new_arrangement=new_arrangement)
@@ -67,19 +81,16 @@ class ArrangementService(ArrangementAbstractService):
 
     def update_arrangement(self, id, data):
         arrangement = self._check_if_arrangement_exist(id)
+        self
 
         if data.get('start_date'):
             arrangement.start_date = data.get('start_date')
-
         if data.get('end_date'):
             arrangement.end_date = data.get('end_date')
-
         if data.get('tourist_guide_id'):
-            arrangement.tourist_guide_id = data.get('tourist_guide_id')
-
+            arrangement.tourist_guide_id = data.get('travel_guide_id')
         if data.get('free_places'):
             arrangement.free_places = data.get('free_places')
-
         if data.get('price'):
             arrangement.price = data.get('price')
 
@@ -87,3 +98,7 @@ class ArrangementService(ArrangementAbstractService):
             update_arrangement(arrangement=arrangement, id=id)
 
         return arrangement
+
+    def get_all_arrangements_without_guide(self):
+        data = arrangement_dao.get_all_arrangements_without_guide()
+        return data

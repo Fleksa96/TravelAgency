@@ -1,7 +1,7 @@
 class Config:
     ENV_TYPE = None
 
-    DEBUG = False
+    DEBUG = True
 
     DB_NAME = None
     DB_USER = None

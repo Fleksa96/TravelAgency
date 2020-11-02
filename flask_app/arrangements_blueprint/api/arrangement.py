@@ -6,12 +6,14 @@ from flask_app.arrangements_blueprint import arrangements_api
 from flask_app.arrangements_blueprint.services \
     import ArrangementService
 from flask_app.common_blueprint.schemas import \
-    CreateArrangementSchema, GetArrangementSchema, UpdateArrangementSchema
+    CreateArrangementSchema, GetArrangementSchema, UpdateArrangementSchema, \
+    ArrangementMinimalSchema
 
 # schemas
 create_arrangement_schema = CreateArrangementSchema()
 get_arrangement_schema = GetArrangementSchema()
 update_arrangement_schema = UpdateArrangementSchema()
+arrangement_minimal_schema = ArrangementMinimalSchema(many=True)
 
 # services
 arrangement_service = ArrangementService()
@@ -21,7 +23,7 @@ arrangement_service = ArrangementService()
 class ArrangementApi(Resource):
     def get(self):
         data = arrangement_service.get_all_arrangements()
-        arrangements = GetArrangementSchema(many=True).dump(data)
+        arrangements = arrangement_minimal_schema.dump(data)
         return arrangements
 
     # @login_required
@@ -31,11 +33,28 @@ class ArrangementApi(Resource):
         return get_arrangement_schema.dump(arrangement)
 
 
+@arrangements_api.route('/no-travel-guide')
+class ArrangementApi(Resource):
+    def get(self):
+        data = arrangement_service.get_all_arrangements_without_guide()
+        arrangements = get_arrangement_schema.dump(data)
+        return arrangements
+
+
 @arrangements_api.route('/<int:id>')
-class ArrangementApiId(Resource):
+class ArrangementIdApi(Resource):
+    def get(self, id):
+        data = arrangement_service.get_arrangement_by_id(
+            arrangement_id=id
+        )
+        arrangements = get_arrangement_schema.dump(data)
+        return arrangements
+
     # @login_required
     def delete(self, id):
-        message = arrangement_service.delete_arrangement(arrangement_id=id)
+        message = arrangement_service.delete_arrangement(
+            arrangement_id=id
+        )
         return message
 
     # @login_required
