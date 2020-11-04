@@ -23,10 +23,12 @@ class ApplicationService(ApplicatioAbstractService):
     @staticmethod
     def _check_if_arrangement_exist(arrangement_id):
         if not arrangement_id:
-            raise Conflict(description='Arrangement does not exist')
+            raise Conflict(description='Wrong arrangement id')
         arrangement = arrangement_dao.get_arrangement_by_id(arrangement_id)
         if not arrangement:
             raise Conflict(description='Arrangement does not exist')
+        if arrangement.travel_guide_id:
+            raise Conflict(description='Arrangement already has travel guide')
         return arrangement
 
     @staticmethod
@@ -34,12 +36,13 @@ class ApplicationService(ApplicatioAbstractService):
         if not user_id:
             raise Conflict(description='User does not exist')
         user = user_dao.get_user_by_id(user_id)
-        if not user:
+        if not user or user.user_type != 2:
             raise Conflict(description='User does not exist')
         return user
 
     def get_all_arrangements_for_travel_guide(self, travel_guide_id):
-        data = arrangement_dao.get_all_arrangements_for_travel_guide(
+        self._check_if_user_exist(travel_guide_id)
+        data = arrangement_dao.get_all_applications_for_travel_guide(
             travel_guide_id=travel_guide_id
         )
         return data
@@ -49,7 +52,9 @@ class ApplicationService(ApplicatioAbstractService):
         arrangement = self._check_if_arrangement_exist(arrangement_id)
         user = self._check_if_user_exist(travel_guide_id)
 
-        application = arrangement.users_applications.append(user)
+        arrangement.users_applications.append(user)
+
+        application = arrangement
         application = application_dao.create_application(
             application=application
         )

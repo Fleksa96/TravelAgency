@@ -10,10 +10,12 @@ from flask_app.arrangements_blueprint.services.arrangement_abstract_service \
 
 from data_layer.dao.arrangement.implementation.arrangement_dao \
     import ArrangementDao
+from data_layer.dao.user.implementation.user_dao import UserDao
 from data_layer.models import Arrangement
 
 # daos
 arrangement_dao = ArrangementDao()
+user_dao = UserDao()
 
 
 class ArrangementService(ArrangementAbstractService):
@@ -27,10 +29,11 @@ class ArrangementService(ArrangementAbstractService):
         return arrangement
 
     @staticmethod
-    def _check_if_admin_id_is_current_user_id(arrangement_id):
-        admin_id = arrangement_dao. \
-            get_arrangement_by_id(arrangement_id=arrangement_id)
-        if not admin_id:
+    def _check_if_admin_id_is_current_user_id(user_id):
+        admin = user_dao.get_user_by_id(
+            user_id=user_id
+        )
+        if admin.admin_id != 1:
             raise Conflict(description='You are not authorized to '
                                        'update this arrangement!')
 
@@ -81,6 +84,7 @@ class ArrangementService(ArrangementAbstractService):
             admin_id=data.get('admin_id'),
             travel_guide_id=data.get('travel_guide_id')
         )
+
         arrangement = arrangement_dao. \
             create_arrangement(new_arrangement=new_arrangement)
         return arrangement
@@ -106,4 +110,10 @@ class ArrangementService(ArrangementAbstractService):
 
     def get_all_arrangements_without_guide(self):
         data = arrangement_dao.get_all_arrangements_without_guide()
+        return data
+
+    def get_all_arrangements_for_guide(self, travel_guide_id):
+        data = arrangement_dao.get_all_arrangements_for_travel_guide(
+            travel_guide_id=travel_guide_id
+        )
         return data

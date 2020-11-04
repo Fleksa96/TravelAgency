@@ -32,3 +32,6 @@ class ArrangementAbstractService(object):
     def get_all_arrangements_for_tourist(self, tourist_id):
         raise NotImplementedError()
 
+    @abstractmethod
+    def get_all_arrangements_for_guide(self, travel_guide_id):
+        raise NotImplementedError()

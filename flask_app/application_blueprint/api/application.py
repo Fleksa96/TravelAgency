@@ -16,15 +16,17 @@ application_service = ApplicationService()
 get_guide_arrangement_schema = GetGuideArrangementSchema(many=True)
 create_application_schema = CreateApplicationSchema()
 
+
 @application_api.route('/<int:id>')
 class ApplicationApi(Resource):
-    # guides application check
+    # getting guides applications and status of application
     def get(self, id):
         data = application_service.get_all_arrangements_for_travel_guide(
             travel_guide_id=id
         )
         return get_guide_arrangement_schema.dump(data)
 
+    # posting application from travel_guide
     def post(self, id):
         post_data = create_application_schema.load(request.json)
         application = application_service.create_application(

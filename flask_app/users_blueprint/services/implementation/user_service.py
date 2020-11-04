@@ -17,6 +17,10 @@ class UserService(GenericService, UserAbstractService):
         arrangement = GenericService.check_if_arrangement_exist(
             arrangement_id=arrangement_id
         )
+        if arrangement.travel_guide_id:
+            raise Conflict(
+                description='Arrangement already has travel guide'
+            )
         return arrangement
 
     @staticmethod

@@ -70,13 +70,19 @@ class ArrangementDao(ArrangementAbstractDao):
             all()
         return arrangements
 
-    def get_all_arrangements_for_travel_guide(self, travel_guide_id):
+    def get_all_applications_for_travel_guide(self, travel_guide_id):
         arrangement = aliased(Arrangement, name='arrangement')
         data = db.session. \
             query(arrangement,
                   guides_applications.c.request_status). \
             join(guides_applications,
                  guides_applications.c.arrangement_id == Arrangement.id). \
-            filter(users_arrangements.c.user_id == travel_guide_id)
+            filter(guides_applications.c.user_id == travel_guide_id)
 
         return data.all()
+
+    def get_all_arrangements_for_travel_guide(self, travel_guide_id):
+        data = db.session.query(Arrangement). \
+            filter(Arrangement.travel_guide_id == travel_guide_id). \
+            all()
+        return data

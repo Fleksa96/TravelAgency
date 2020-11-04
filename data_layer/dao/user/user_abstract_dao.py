@@ -9,7 +9,7 @@ class UserAbstractDao(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def check_identity(self, data):
+    def check_identity(self, username, password):
         raise NotImplementedError()
 
     @abstractmethod

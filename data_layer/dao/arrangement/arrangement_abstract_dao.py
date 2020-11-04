@@ -25,6 +25,10 @@ class ArrangementAbstractDao(object):
         raise NotImplementedError()
 
     @abstractmethod
+    def get_all_applications_for_travel_guide(self, travel_guide_id):
+        raise NotImplementedError()
+
+    @abstractmethod
     def get_all_arrangements_for_travel_guide(self, travel_guide_id):
         raise NotImplementedError()
 
