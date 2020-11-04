@@ -9,7 +9,7 @@ class ArrangementAbstractService(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def update_arrangement(self, data):
+    def update_arrangement(self, id, data):
         raise NotImplementedError()
 
     @abstractmethod
@@ -27,3 +27,8 @@ class ArrangementAbstractService(object):
     @abstractmethod
     def get_all_arrangements_without_guide(self):
         raise NotImplementedError()
+
+    @abstractmethod
+    def get_all_arrangements_for_tourist(self, tourist_id):
+        raise NotImplementedError()
+

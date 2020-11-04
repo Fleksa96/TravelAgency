@@ -9,6 +9,7 @@ mail = Mail()
 
 from flask_app.users_blueprint import user_blueprint
 from flask_app.arrangements_blueprint import arrangement_blueprint
+from flask_app.application_blueprint import applications_blueprint
 
 
 def create_app(config):
@@ -21,6 +22,7 @@ def create_app(config):
 
     app.register_blueprint(user_blueprint)
     app.register_blueprint(arrangement_blueprint)
+    app.register_blueprint(applications_blueprint)
 
     return app
 

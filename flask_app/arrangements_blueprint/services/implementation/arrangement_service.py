@@ -47,6 +47,12 @@ class ArrangementService(ArrangementAbstractService):
                        f'has been cancelled.'
             mail.send(msg)
 
+    def get_all_arrangements_for_tourist(self, tourist_id):
+        arrangements = arrangement_dao.get_all_arrangements_for_tourist(
+            tourist_id=tourist_id
+        )
+        return arrangements
+
     def get_arrangement_by_id(self, arrangement_id):
         arrangement = self._check_if_arrangement_exist(
             arrangement_id=arrangement_id
@@ -81,7 +87,6 @@ class ArrangementService(ArrangementAbstractService):
 
     def update_arrangement(self, id, data):
         arrangement = self._check_if_arrangement_exist(id)
-        self
 
         if data.get('start_date'):
             arrangement.start_date = data.get('start_date')

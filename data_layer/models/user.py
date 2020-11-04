@@ -11,14 +11,6 @@ users_arrangements = db.Table('reservations',
                                                 ondelete='CASCADE'))
                               )
 
-guides_applications = db.Table('applications',
-                               Column('id', Integer, primary_key=True),
-                               Column('user_id', Integer,
-                                      ForeignKey('user.id')),
-                               Column('arrangement_id', Integer,
-                                      ForeignKey('arrangement.id',
-                                                 ondelete='CASCADE'))
-                               )
 
 
 class User(db.Model):
@@ -37,10 +29,7 @@ class User(db.Model):
         secondary=users_arrangements,
         backref="users_reservations")
 
-    arrangements_applications = relationship(
-        "Arrangement",
-        secondary=guides_applications,
-        backref="guides_applications")
+
 
     def __init__(self,
                  id=None,

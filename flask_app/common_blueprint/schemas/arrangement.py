@@ -4,6 +4,19 @@ from werkzeug.exceptions import Conflict
 from datetime import date
 
 
+class GetRequestStatusSchema(Schema):
+    id = fields.Integer(required=True)
+    start_date = fields.Date(required=True)
+    end_date = fields.Date(required=True)
+    destination = fields.String(required=True)
+    travel_guide_id = fields.Integer(required=True)
+
+
+class GetGuideArrangementSchema(Schema):
+    arrangement = fields.Nested(GetRequestStatusSchema)
+    request_status = fields.Integer(required=True)
+
+
 class ArrangementMinimalSchema(Schema):
     start_date = fields.Date(required=True)
     end_date = fields.Date(required=True)

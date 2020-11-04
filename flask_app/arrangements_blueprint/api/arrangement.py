@@ -34,10 +34,21 @@ class ArrangementApi(Resource):
 
 
 @arrangements_api.route('/no-travel-guide')
-class ArrangementApi(Resource):
+class ArrangementGuideApi(Resource):
     def get(self):
         data = arrangement_service.get_all_arrangements_without_guide()
-        arrangements = get_arrangement_schema.dump(data)
+        arrangements = GetArrangementSchema(many=True).dump(data)
+        return arrangements
+
+
+@arrangements_api.route('/reservation/<int:id>')
+class ArrangementReservationApi(Resource):
+    # rezervacije turiste
+    def get(self, id):
+        data = arrangement_service.get_all_arrangements_for_tourist(
+            tourist_id=id
+        )
+        arrangements = GetArrangementSchema(many=True).dump(data)
         return arrangements
 
 

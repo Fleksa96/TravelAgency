@@ -69,6 +69,12 @@ class UserDao(UserAbstractDao):
             one_or_none()
         return data
 
+    def get_user_by_id(self, user_id):
+        data = db.session.query(User). \
+            filter(User.id == user_id). \
+            one_or_none()
+        return data
+
     def get_user_by_email(self, email):
         data = db.session.query(User). \
             filter(User.email == email). \

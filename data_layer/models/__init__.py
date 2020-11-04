@@ -1,2 +1,2 @@
-from .arrangement import Arrangement
-from .user import User, guides_applications, users_arrangements
+from .arrangement import Arrangement, guides_applications
+from .user import User, users_arrangements
