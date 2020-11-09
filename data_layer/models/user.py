@@ -1,16 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from flask_app import db
-
-users_arrangements = db.Table('reservations',
-                              Column('id', Integer, primary_key=True),
-                              Column('user_id', Integer,
-                                     ForeignKey('user.id')),
-                              Column('arrangement_id', Integer,
-                                     ForeignKey('arrangement.id',
-                                                ondelete='CASCADE'))
-                              )
-
 
 
 class User(db.Model):
@@ -23,13 +13,6 @@ class User(db.Model):
     password = Column(String(20), nullable=False)
     email = Column(String(80), nullable=False, unique=True)
     user_type = Column(Integer, nullable=True, default=3)
-
-    arrangements_reservations = relationship(
-        "Arrangement",
-        secondary=users_arrangements,
-        backref="users_reservations")
-
-
 
     def __init__(self,
                  id=None,

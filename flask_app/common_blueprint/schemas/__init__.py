@@ -2,5 +2,5 @@ from .arrangement import \
     GetArrangementSchema, CreateArrangementSchema, UpdateArrangementSchema, \
     ArrangementMinimalSchema, GetGuideArrangementSchema
 from .user import UserMinimalSchema, GetUserSchema, UserLoginSchema, \
-    CreateUserSchema
+    CreateUserSchema, UpdateUserSchema
 from .application import GetApplicationSchema, CreateApplicationSchema

@@ -32,5 +32,10 @@ class UserAbstractDao(object):
     def get_all_travel_guides_without_any_arrangement(self):
         raise NotImplementedError()
 
+    @abstractmethod
     def get_user_by_email(self, email):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def update_user_data(self, updated_user, tourist_id):
         raise NotImplementedError()

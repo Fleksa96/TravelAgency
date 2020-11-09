@@ -7,13 +7,18 @@ from flask_app.arrangements_blueprint.services \
     import ArrangementService
 from flask_app.common_blueprint.schemas import \
     CreateArrangementSchema, GetArrangementSchema, UpdateArrangementSchema, \
-    ArrangementMinimalSchema
+    ArrangementMinimalSchema, CreateApplicationSchema, GetApplicationSchema,\
+    GetUserSchema
+from flask_app.common_blueprint.services import GenericService
 
 # schemas
 create_arrangement_schema = CreateArrangementSchema()
 get_arrangement_schema = GetArrangementSchema()
 update_arrangement_schema = UpdateArrangementSchema()
 arrangement_minimal_schema = ArrangementMinimalSchema(many=True)
+create_application_schema = CreateApplicationSchema()
+get_user_schema = GetUserSchema(many=True)
+
 
 # services
 arrangement_service = ArrangementService()
@@ -37,32 +42,15 @@ class ArrangementApi(Resource):
         return get_arrangement_schema.dump(arrangement)
 
 
-@arrangements_api.route('/no-travel-guide')
-class ArrangementNoGuideApi(Resource):
-    # getting all arrangements without travel guide
-    def get(self):
-        data = arrangement_service.get_all_arrangements_without_guide()
-        arrangements = GetArrangementSchema(many=True).dump(data)
-        return arrangements
-
-
-@arrangements_api.route('/travel-guide/<int:id>')
+@arrangements_api.route('/search')
 class ArrangementGuideApi(Resource):
-    # getting all arangements for certain travel guide
-    def get(self, id):
-        data = arrangement_service.get_all_arrangements_for_guide(
-            travel_guide_id=id
-        )
-        arrangements = GetArrangementSchema(many=True).dump(data)
-        return arrangements
-
-
-@arrangements_api.route('/reservation/<int:id>')
-class ArrangementReservationApi(Resource):
-    # getting tourist reservation arrangements
-    def get(self, id):
-        data = arrangement_service.get_all_arrangements_for_tourist(
-            tourist_id=id
+    # getting all arrangements depending on query param travel guide
+    def get(self):
+        has_travel_guide = request.args.get('has-travel-guide')
+        if not has_travel_guide:
+            has_travel_guide = False
+        data = arrangement_service.get_all_arrangements_depending_guide(
+            has_travel_guide=has_travel_guide
         )
         arrangements = GetArrangementSchema(many=True).dump(data)
         return arrangements
@@ -87,7 +75,6 @@ class ArrangementIdApi(Resource):
         return message
 
     # @login_required
-    # updating arrangement, need to add validation
     def patch(self, id):
         post_data = update_arrangement_schema.load(request.json)
         arrangement = arrangement_service.update_arrangement(
@@ -95,3 +82,40 @@ class ArrangementIdApi(Resource):
             id=id
         )
         return get_arrangement_schema.dump(arrangement)
+
+
+# this post method will be move to ApplicationGuidesApi once current user
+# is implemented
+@arrangements_api.route('/<int:id>/applications/<int:guide_id>')
+class ArrangementApplicationApi(Resource):
+    # posting application from travel_guide
+    def post(self, id, guide_id):
+        application = arrangement_service.create_application(
+            travel_guide_id=guide_id,
+            arrangement_id=id
+        )
+        return GetApplicationSchema().dump(application)
+
+
+@arrangements_api.route('/<int:id>/applications')
+class ApplicationGuidesApi(Resource):
+    # getting all travel guides with application
+    # for arrangement_id
+    def get(self, id):
+        data = arrangement_service.get_all_guides_with_application(
+            arrangement_id=id
+        )
+        travel_guides = get_user_schema.dump(data)
+        return travel_guides
+
+
+@arrangements_api.route('/<int:id>/guides')
+class ArrangementGuides(Resource):
+    # getting all travel guides without arrangements and
+    # travel guides with spare time
+    def get(self, id):
+        data = GenericService.get_all_travel_guides_without_arrangement(
+            arrangement_id=id
+        )
+        travel_guides = get_user_schema.dump(data)
+        return travel_guides

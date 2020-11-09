@@ -3,22 +3,12 @@ from sqlalchemy import (Column,
                         String,
                         Date,
                         Float,
-                        ForeignKey)
+                        ForeignKey,
+                        Boolean,
+                        UniqueConstraint)
 
 from flask_app import db
 from sqlalchemy.orm import relationship
-
-
-guides_applications = db.Table('applications',
-                               Column('id', Integer, primary_key=True),
-                               Column('user_id', Integer,
-                                      ForeignKey('user.id')),
-                               Column('arrangement_id', Integer,
-                                      ForeignKey('arrangement.id',
-                                                 ondelete='CASCADE')),
-                               Column('request_status', Integer,
-                                      default=1)
-                               )
 
 
 class Arrangement(db.Model):
@@ -33,6 +23,7 @@ class Arrangement(db.Model):
     free_places = Column(Integer, nullable=False)
     admin_id = Column(Integer, ForeignKey('user.id'))
     travel_guide_id = Column(Integer, ForeignKey('user.id'), nullable=True)
+    is_active = Column(Boolean, nullable=True, default=True)
 
     admin = relationship(
         'User',
@@ -45,10 +36,6 @@ class Arrangement(db.Model):
         foreign_keys=[travel_guide_id],
         backref='tour_arrangements'
     )
-    users_applications = relationship(
-        "User",
-        secondary=guides_applications,
-        backref="guides_applications")
 
     def __init__(self,
                  id=None,

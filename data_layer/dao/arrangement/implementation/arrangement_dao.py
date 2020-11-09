@@ -1,10 +1,10 @@
+from sqlalchemy import distinct
 from sqlalchemy.orm import aliased
 
 from data_layer.dao.arrangement.arrangement_abstract_dao import \
     ArrangementAbstractDao
 
-from data_layer.models import User, Arrangement, users_arrangements, \
-    guides_applications
+from data_layer.models import User, Arrangement
 
 from flask_app import db
 
@@ -17,30 +17,36 @@ class ArrangementDao(ArrangementAbstractDao):
                                  destination.label('destination')). \
             filter(users_arrangements.c.arrangement_id == arrangement_id). \
             filter(users_arrangements.c.user_id == User.id). \
+            filter(Arrangement.is_active.is_(True)). \
             all()
         return users
 
     def get_admin_id_from_arrangement_id(self, arrangement_id):
         arrangement = db.session.query(Arrangement). \
-                                filter(Arrangement.id == arrangement_id). \
-                                first()
+            filter(Arrangement.id == arrangement_id). \
+            filter(Arrangement.is_active.is_(True)). \
+            first()
         return arrangement.admin_id
 
     def delete_arrangement(self, arrangement_id):
-        db.session.query(Arrangement). \
+        arrangement = db.session.query(Arrangement). \
             filter(Arrangement.id == arrangement_id). \
-            delete()
+            first()
+        arrangement.is_active = False
         db.session.commit()
         return {'message': 'You successfully deleted an arrangement'}, 200
 
     def get_arrangement_by_id(self, arrangement_id):
         data = db.session.query(Arrangement). \
             filter(Arrangement.id == arrangement_id). \
+            filter(Arrangement.is_active.is_(True)). \
             first()
         return data
 
     def get_all_arrangements(self):
-        data = db.session.query(Arrangement).all()
+        data = db.session.query(Arrangement). \
+            filter(Arrangement.is_active.is_(True)). \
+            all()
         return data
 
     def create_arrangement(self, new_arrangement):
@@ -50,39 +56,54 @@ class ArrangementDao(ArrangementAbstractDao):
 
     def update_arrangement(self, arrangement, id):
         updated_arrangement = db.session.query(Arrangement). \
-                                filter(Arrangement.id == id). \
-                                first()
+            filter(Arrangement.id == id). \
+            first()
         updated_arrangement = arrangement
         db.session.commit()
         return updated_arrangement
 
-    def get_all_arrangements_without_guide(self):
+    def get_all_arrangements_depending_guide(self, has_travel_guide):
         data = db.session.query(Arrangement). \
-            filter(Arrangement.travel_guide_id.is_(None)). \
-            all()
-        return data
+            filter(Arrangement.is_active.is_(True))
+        if has_travel_guide:
+            data = data.\
+                filter(Arrangement.travel_guide_id.isnot(None))
+        else:
+            data = data. \
+                filter(Arrangement.travel_guide_id.is_(None))
+        return data.all()
 
     def get_all_arrangements_for_tourist(self, tourist_id):
         arrangements = db.session.query(Arrangement). \
             join(users_arrangements,
                  users_arrangements.c.arrangement_id == Arrangement.id). \
             filter(users_arrangements.c.user_id == tourist_id). \
+            filter(Arrangement.is_active.is_(True)). \
             all()
         return arrangements
 
     def get_all_applications_for_travel_guide(self, travel_guide_id):
         arrangement = aliased(Arrangement, name='arrangement')
-        data = db.session. \
-            query(arrangement,
-                  guides_applications.c.request_status). \
-            join(guides_applications,
-                 guides_applications.c.arrangement_id == Arrangement.id). \
-            filter(guides_applications.c.user_id == travel_guide_id)
-
-        return data.all()
+        # data = db.session. \
+        #     query(arrangement,
+        #           guides_applications.c.request_status). \
+        #     join(guides_applications,
+        #          guides_applications.c.arrangement_id == Arrangement.id). \
+        #     filter(arrangement.is_active.is_(True)). \
+        #     filter(guides_applications.c.user_id == travel_guide_id)
+        #
+        # return data.all()
 
     def get_all_arrangements_for_travel_guide(self, travel_guide_id):
         data = db.session.query(Arrangement). \
             filter(Arrangement.travel_guide_id == travel_guide_id). \
-            all()
-        return data
+            filter(Arrangement.is_active.is_(True))
+        return data.all()
+
+    def get_arrangement_by_destination_and_dates(self, new_arrangement):
+        arrangement = db.session.query(Arrangement).\
+            filter(Arrangement.destination == new_arrangement.destination).\
+            filter(Arrangement.start_date == new_arrangement.start_date).\
+            filter(Arrangement.end_date == new_arrangement.end_date).\
+            one_or_none()
+        return arrangement

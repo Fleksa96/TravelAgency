@@ -18,6 +18,7 @@ class GetGuideArrangementSchema(Schema):
 
 
 class ArrangementMinimalSchema(Schema):
+    id = fields.Integer(required=True)
     start_date = fields.Date(required=True)
     end_date = fields.Date(required=True)
     description = fields.String(required=True)
@@ -43,18 +44,6 @@ class UpdateArrangementSchema(Schema):
     free_places = fields.Integer()
     travel_guide_id = fields.Integer()
 
-    # @validates('start_date')
-    # def check_if_start_date_is_in_future(self, start_date):
-    #     if start_date and start_date < date.today():
-    #         raise Conflict(description='Start date is in past')
-    #
-    # @validates_schema
-    # def validate_numbers(self, data, **kwargs):
-    #     if data.get('end_date') and data.get('start_date') \
-    #             and data.get('end_date') < data.get('start_date'):
-    #         raise Conflict(description='End date is before ' \
-    #                                    'start date')
-
 
 class CreateArrangementSchema(Schema):
     start_date = fields.Date(required=True)
@@ -73,6 +62,14 @@ class CreateArrangementSchema(Schema):
 
     @validates_schema
     def validate_numbers(self, data, **kwargs):
-        if data["end_date"] < data["start_date"]:
+        if data.get("end_date") < data.get("start_date"):
             raise Conflict(description='End date is before ' \
                                        'start date')
+        if data.get('free_places') < 0:
+            raise Conflict(
+                description='Free places must be positive number'
+            )
+        if data.get('price') < 0:
+            raise Conflict(
+                description='Price must be positive value'
+            )

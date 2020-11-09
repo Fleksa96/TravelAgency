@@ -3,7 +3,7 @@ from flask_app import db
 from sqlalchemy import not_, between, and_, distinct
 
 from data_layer.dao.user.user_abstract_dao import UserAbstractDao
-from data_layer.models import User, Arrangement, guides_applications
+from data_layer.models import User, Arrangement
 
 
 class UserDao(UserAbstractDao):
@@ -14,14 +14,15 @@ class UserDao(UserAbstractDao):
             subquery()
         free_travel_guides = db.session.query(User). \
             filter(User.user_type == 2). \
-            filter(User.id.notin_(subquery)).\
+            filter(User.id.notin_(subquery)). \
             all()
         return free_travel_guides
 
     def get_all_travel_guides_with_application(self, arrangement):
-        guides_id = db.session.query(guides_applications.c.user_id). \
-            filter(arrangement.id == guides_applications.c.arrangement_id). \
-            all()
+        # guides_id = db.session.query(guides_applications.c.user_id). \
+        #     filter(arrangement.id == guides_applications.c.arrangement_id). \
+        #     all()
+        guides_id = 5 #obrisi ovo posle
 
         guides = db.session.query(User). \
             join(Arrangement, Arrangement.travel_guide_id == User.id). \
@@ -51,7 +52,7 @@ class UserDao(UserAbstractDao):
                 arrangement.start_date,
                 arrangement.end_date)))). \
             filter(not_(and_(arrangement.start_date > Arrangement.start_date,
-                             arrangement.start_date < Arrangement.end_date))).\
+                             arrangement.start_date < Arrangement.end_date))). \
             filter(not_(and_(arrangement.end_date > Arrangement.start_date,
                              arrangement.end_date < Arrangement.end_date))). \
             all()
@@ -86,4 +87,12 @@ class UserDao(UserAbstractDao):
             filter(User.username == username). \
             filter(User.password == password). \
             first()
+        return user
+
+    def update_user_data(self, updated_user, user_id):
+        user = db.session.query(User). \
+            filter(User.id == user_id). \
+            first()
+        user = updated_user
+        db.session.commit()
         return user

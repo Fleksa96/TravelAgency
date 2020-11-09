@@ -25,13 +25,13 @@ class ArrangementAbstractService(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_arrangements_without_guide(self):
+    def get_all_arrangements_depending_guide(self, has_travel_guide):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_arrangements_for_tourist(self, tourist_id):
+    def create_application(self, travel_guide_id, post_data):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_arrangements_for_guide(self, travel_guide_id):
+    def get_all_guides_with_application(self, arrangement_id):
         raise NotImplementedError()

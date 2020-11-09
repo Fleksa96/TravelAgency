@@ -17,7 +17,7 @@ class ArrangementAbstractDao(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_arrangements_without_guide(self):
+    def get_all_arrangements_depending_guide(self, has_travel_guide):
         raise NotImplementedError()
 
     @abstractmethod
@@ -46,4 +46,8 @@ class ArrangementAbstractDao(object):
 
     @abstractmethod
     def get_users_from_reservation(self, arrangement_id):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_arrangement_by_destination_and_dates(self, new_arrangement):
         raise NotImplementedError()
