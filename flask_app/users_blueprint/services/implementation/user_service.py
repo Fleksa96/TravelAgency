@@ -136,3 +136,4 @@ class UserService(GenericService, UserAbstractService):
             user_id=user_id
         )
         return updated_user
+

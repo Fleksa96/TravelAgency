@@ -18,27 +18,16 @@ class UserDao(UserAbstractDao):
             all()
         return free_travel_guides
 
-    def get_all_travel_guides_with_application(self, arrangement):
-        guides_id = db.session.query(Application.user_id). \
-            filter(arrangement.id == Application.arrangement_id). \
+    def get_all_travel_guides_with_application(self,
+                                               arrangement,
+                                               available_guides):
+
+        guides = db.session.query(User).\
+            join(Application, Application.user_id == User.id).\
+            filter(Application.arrangement_id == arrangement.id).\
             all()
 
-        guides = db.session.query(User). \
-            join(Arrangement, Arrangement.travel_guide_id == User.id). \
-            filter(User.id.in_(guides_id)). \
-            filter(not_(and_(Arrangement.start_date.between(
-            arrangement.start_date,
-            arrangement.end_date),
-            Arrangement.end_date.between(
-                arrangement.start_date,
-                arrangement.end_date)))). \
-            filter(not_(and_(arrangement.start_date > Arrangement.start_date,
-                             arrangement.start_date < Arrangement.end_date))).\
-            filter(not_(and_(arrangement.end_date > Arrangement.start_date,
-                             arrangement.end_date < Arrangement.end_date))). \
-            all()
-
-        return guides
+        return list(set(available_guides) & set(guides))
 
     def get_all_travel_guides_with_spare_time(self, arrangement):
         guides = db.session.query(User). \

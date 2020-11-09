@@ -7,7 +7,7 @@ from flask_app.arrangements_blueprint.services \
     import ArrangementService
 from flask_app.common_blueprint.schemas import \
     CreateArrangementSchema, GetArrangementSchema, UpdateArrangementSchema, \
-    ArrangementMinimalSchema, CreateApplicationSchema, GetApplicationSchema,\
+    ArrangementMinimalSchema, GetApplicationSchema,\
     GetUserSchema
 from flask_app.common_blueprint.services import GenericService
 
@@ -16,7 +16,6 @@ create_arrangement_schema = CreateArrangementSchema()
 get_arrangement_schema = GetArrangementSchema()
 update_arrangement_schema = UpdateArrangementSchema()
 arrangement_minimal_schema = ArrangementMinimalSchema(many=True)
-create_application_schema = CreateApplicationSchema()
 get_user_schema = GetUserSchema(many=True)
 
 
@@ -48,6 +47,10 @@ class ArrangementGuideApi(Resource):
     def get(self):
         has_travel_guide = request.args.get('has-travel-guide')
         if not has_travel_guide:
+            has_travel_guide = False
+        elif has_travel_guide == 'True':
+            has_travel_guide = True
+        else:
             has_travel_guide = False
         data = arrangement_service.get_all_arrangements_depending_guide(
             has_travel_guide=has_travel_guide
@@ -114,7 +117,7 @@ class ArrangementGuides(Resource):
     # getting all travel guides without arrangements and
     # travel guides with spare time
     def get(self, id):
-        data = GenericService.get_all_travel_guides_without_arrangement(
+        data = GenericService.get_all_available_travel_guides(
             arrangement_id=id
         )
         travel_guides = get_user_schema.dump(data)

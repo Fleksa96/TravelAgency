@@ -25,7 +25,9 @@ class UserAbstractDao(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_travel_guides_with_application(self, arrangement):
+    def get_all_travel_guides_with_application(self,
+                                               arrangement,
+                                               available_guides):
         raise NotImplementedError()
 
     @abstractmethod

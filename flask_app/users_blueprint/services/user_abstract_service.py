@@ -21,10 +21,6 @@ class UserAbstractService(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_travel_guides_without_arrangement(self, arrangement_id):
-        raise NotImplementedError()
-
-    @abstractmethod
     def get_all_arrangements_for_guide(self, travel_guide_id):
         raise NotImplementedError()
 

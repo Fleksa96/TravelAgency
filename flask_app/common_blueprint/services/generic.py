@@ -49,7 +49,7 @@ class GenericService:
         return user
 
     @staticmethod
-    def get_all_travel_guides_without_arrangement(arrangement_id):
+    def get_all_available_travel_guides(arrangement_id):
         arrangement = GenericService.check_if_arrangement_exist(
             arrangement_id=arrangement_id
         )

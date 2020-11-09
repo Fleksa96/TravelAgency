@@ -65,7 +65,7 @@ class ArrangementDao(ArrangementAbstractDao):
     def get_all_arrangements_depending_guide(self, has_travel_guide):
         data = db.session.query(Arrangement). \
             filter(Arrangement.is_active.is_(True))
-        if has_travel_guide:
+        if has_travel_guide is True:
             data = data.\
                 filter(Arrangement.travel_guide_id.isnot(None))
         else:

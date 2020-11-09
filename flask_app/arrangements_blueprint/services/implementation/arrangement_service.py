@@ -15,7 +15,7 @@ from data_layer.dao.user.implementation.user_dao import UserDao
 from data_layer.dao.application.implementation.application_dao import \
     ApplicationDao
 
-from data_layer.models import Arrangement
+from data_layer.models import Arrangement, Application
 
 # daos
 arrangement_dao = ArrangementDao()
@@ -51,7 +51,7 @@ class ArrangementService(ArrangementAbstractService, GenericService):
     @staticmethod
     def _check_if_guide_is_available(arrangement_id, user):
         guide_ids = \
-            GenericService.get_all_travel_guides_without_arrangement(
+            GenericService.get_all_available_travel_guides(
                 arrangement_id=arrangement_id
             )
         if user not in guide_ids:
@@ -231,7 +231,7 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         return data
 
     def create_application(self, travel_guide_id, arrangement_id):
-        arrangement = self.check_if_arrangement_exist(arrangement_id)
+        self.check_if_arrangement_exist(arrangement_id)
         user = self.check_if_user_is_guide(travel_guide_id)
         self._check_if_application_already_exist(
             user_id=travel_guide_id,
@@ -241,9 +241,12 @@ class ArrangementService(ArrangementAbstractService, GenericService):
             arrangement_id=arrangement_id,
             user=user
         )
-        arrangement.users_applications.append(user)
 
-        application = arrangement
+        application = Application(
+            user_id=travel_guide_id,
+            arrangement_id=arrangement_id
+        )
+
         application = application_dao.create_application(
             application=application
         )
@@ -254,7 +257,11 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         arrangement = self.check_if_arrangement_exist(
             arrangement_id=arrangement_id
         )
+        available_guides = self.get_all_available_travel_guides(
+            arrangement_id=arrangement_id
+        )
         guides = user_dao.get_all_travel_guides_with_application(
-            arrangement=arrangement
+            arrangement=arrangement,
+            available_guides=available_guides
         )
         return guides

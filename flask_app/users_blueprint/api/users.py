@@ -85,4 +85,4 @@ class UserLogin(Resource):
     def post(self):
         post_data = user_login_schema.load(request.json)
         user = user_service.login_user(data=post_data)
-        return get_user_schema.dump(user)
+        return GetUserSchema().dump(user)

@@ -3,4 +3,4 @@ from .arrangement import \
     ArrangementMinimalSchema, GetGuideArrangementSchema
 from .user import UserMinimalSchema, GetUserSchema, UserLoginSchema, \
     CreateUserSchema, UpdateUserSchema
-from .application import GetApplicationSchema, CreateApplicationSchema
+from .application import GetApplicationSchema

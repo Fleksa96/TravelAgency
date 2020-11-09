@@ -34,6 +34,11 @@ class UpdateUserSchema(Schema):
             raise Conflict(
                 description='You need to enter password confirmation'
             )
+        if data.get("password") is None and \
+                data.get("confirm_password") is not None:
+            raise Conflict(
+                description='You need to enter password first'
+            )
 
 
 class GetUserSchema(Schema):
