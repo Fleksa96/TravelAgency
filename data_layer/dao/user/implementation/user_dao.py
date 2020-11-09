@@ -3,7 +3,7 @@ from flask_app import db
 from sqlalchemy import not_, between, and_, distinct
 
 from data_layer.dao.user.user_abstract_dao import UserAbstractDao
-from data_layer.models import User, Arrangement
+from data_layer.models import User, Arrangement, Application
 
 
 class UserDao(UserAbstractDao):
@@ -19,10 +19,9 @@ class UserDao(UserAbstractDao):
         return free_travel_guides
 
     def get_all_travel_guides_with_application(self, arrangement):
-        # guides_id = db.session.query(guides_applications.c.user_id). \
-        #     filter(arrangement.id == guides_applications.c.arrangement_id). \
-        #     all()
-        guides_id = 5 #obrisi ovo posle
+        guides_id = db.session.query(Application.user_id). \
+            filter(arrangement.id == Application.arrangement_id). \
+            all()
 
         guides = db.session.query(User). \
             join(Arrangement, Arrangement.travel_guide_id == User.id). \

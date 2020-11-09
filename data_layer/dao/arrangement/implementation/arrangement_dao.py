@@ -4,7 +4,7 @@ from sqlalchemy.orm import aliased
 from data_layer.dao.arrangement.arrangement_abstract_dao import \
     ArrangementAbstractDao
 
-from data_layer.models import User, Arrangement
+from data_layer.models import User, Arrangement, Reservation, Application
 
 from flask_app import db
 
@@ -15,8 +15,8 @@ class ArrangementDao(ArrangementAbstractDao):
         users = db.session.query(User,
                                  Arrangement. \
                                  destination.label('destination')). \
-            filter(users_arrangements.c.arrangement_id == arrangement_id). \
-            filter(users_arrangements.c.user_id == User.id). \
+            filter(Reservation.arrangement_id == arrangement_id). \
+            filter(Reservation.user_id == User.id). \
             filter(Arrangement.is_active.is_(True)). \
             all()
         return users
@@ -75,24 +75,24 @@ class ArrangementDao(ArrangementAbstractDao):
 
     def get_all_arrangements_for_tourist(self, tourist_id):
         arrangements = db.session.query(Arrangement). \
-            join(users_arrangements,
-                 users_arrangements.c.arrangement_id == Arrangement.id). \
-            filter(users_arrangements.c.user_id == tourist_id). \
+            join(Reservation,
+                 Reservation.arrangement_id == Arrangement.id). \
+            filter(Reservation.user_id == tourist_id). \
             filter(Arrangement.is_active.is_(True)). \
             all()
         return arrangements
 
     def get_all_applications_for_travel_guide(self, travel_guide_id):
         arrangement = aliased(Arrangement, name='arrangement')
-        # data = db.session. \
-        #     query(arrangement,
-        #           guides_applications.c.request_status). \
-        #     join(guides_applications,
-        #          guides_applications.c.arrangement_id == Arrangement.id). \
-        #     filter(arrangement.is_active.is_(True)). \
-        #     filter(guides_applications.c.user_id == travel_guide_id)
-        #
-        # return data.all()
+        data = db.session. \
+            query(arrangement,
+                  Application.request_status). \
+            join(Application,
+                 Application.arrangement_id == Arrangement.id). \
+            filter(arrangement.is_active.is_(True)). \
+            filter(Application.user_id == travel_guide_id)
+
+        return data.all()
 
     def get_all_arrangements_for_travel_guide(self, travel_guide_id):
         data = db.session.query(Arrangement). \
