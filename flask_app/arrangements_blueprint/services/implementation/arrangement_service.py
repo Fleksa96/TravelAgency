@@ -14,13 +14,16 @@ from data_layer.dao.arrangement.implementation.arrangement_dao \
 from data_layer.dao.user.implementation.user_dao import UserDao
 from data_layer.dao.application.implementation.application_dao import \
     ApplicationDao
+from data_layer.dao.reservation.implementation.reservation_dao import \
+    ReservationDao
 
-from data_layer.models import Arrangement, Application
+from data_layer.models import Arrangement, Application, Reservation
 
 # daos
 arrangement_dao = ArrangementDao()
 user_dao = UserDao()
 application_dao = ApplicationDao()
+reservation_dao = ReservationDao()
 
 
 class ArrangementService(ArrangementAbstractService, GenericService):
@@ -34,6 +37,24 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         if application:
             raise Conflict(
                 description='Application already exists'
+            )
+
+    @staticmethod
+    def _check_if_reservation_already_exist(user_id, arrangement_id):
+        reservation = reservation_dao.get_reservation_by_arrangement_user_id(
+            user_id=user_id,
+            arrangement_id=arrangement_id
+        )
+        return reservation
+
+    @staticmethod
+    def _check_if_arrangement_has_free_places(arrangement,
+                                              number_of_reservations):
+        if arrangement.free_places < number_of_reservations:
+            raise Conflict(
+                description='Arrangement have only ' +
+                            str(arrangement.free_places) +
+                            ' free places left'
             )
 
     @staticmethod
@@ -224,9 +245,10 @@ class ArrangementService(ArrangementAbstractService, GenericService):
 
         return arrangement
 
-    def get_all_arrangements_depending_guide(self, has_travel_guide):
-        data = arrangement_dao.get_all_arrangements_depending_guide(
-            has_travel_guide=has_travel_guide
+    def search_all_arrangements(self, query_params):
+
+        data = arrangement_dao.search_all_arrangements(
+            query_params=query_params
         )
         return data
 
@@ -265,3 +287,34 @@ class ArrangementService(ArrangementAbstractService, GenericService):
             available_guides=available_guides
         )
         return guides
+
+    def create_reservation(self, arrangement_id, data, tourist_id):
+        arrangement = self.check_if_arrangement_exist(arrangement_id)
+        self.check_if_user_is_tourist(tourist_id)
+        number_of_reservations = data.get('number_of_reservations')
+        self._check_if_arrangement_has_free_places(
+            arrangement=arrangement,
+            number_of_reservations=number_of_reservations
+        )
+        reservation = self._check_if_reservation_already_exist(
+            arrangement_id=arrangement_id,
+            user_id=tourist_id
+        )
+        if reservation is None:
+            reservation = Reservation(
+                user_id=tourist_id,
+                arrangement_id=arrangement_id,
+                num_of_places=number_of_reservations
+            )
+            message = reservation_dao.create_reservation(
+                user_id=tourist_id,
+                arrangement=arrangement,
+                reservation=reservation
+            )
+        else:
+            message = reservation_dao.update_reservation(
+                reservation=reservation,
+                arrangement=arrangement,
+                num_of_places=number_of_reservations
+            )
+        return message

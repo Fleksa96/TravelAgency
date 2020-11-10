@@ -62,15 +62,30 @@ class ArrangementDao(ArrangementAbstractDao):
         db.session.commit()
         return updated_arrangement
 
-    def get_all_arrangements_depending_guide(self, has_travel_guide):
-        data = db.session.query(Arrangement). \
-            filter(Arrangement.is_active.is_(True))
-        if has_travel_guide is True:
-            data = data.\
-                filter(Arrangement.travel_guide_id.isnot(None))
-        else:
+    def search_all_arrangements(self, query_params):
+        data = db.session.query(Arrangement)
+
+        travel_guide = query_params.get('has_travel_guide')
+        start_date = query_params.get('start_date')
+        destination = query_params.get('destination')
+
+        if travel_guide:
+            if travel_guide is True:
+                data = data. \
+                    filter(Arrangement.travel_guide_id.isnot(None))
+            else:
+                data = data. \
+                    filter(Arrangement.travel_guide_id.is_(None))
+        if start_date:
             data = data. \
-                filter(Arrangement.travel_guide_id.is_(None))
+                filter(Arrangement.start_date > start_date)
+        if destination:
+            data = data. \
+                filter(Arrangement.destination == destination)
+
+        data = data. \
+            filter(Arrangement.is_active.is_(True))
+
         return data.all()
 
     def get_all_arrangements_for_tourist(self, tourist_id):
@@ -101,9 +116,9 @@ class ArrangementDao(ArrangementAbstractDao):
         return data.all()
 
     def get_arrangement_by_destination_and_dates(self, new_arrangement):
-        arrangement = db.session.query(Arrangement).\
-            filter(Arrangement.destination == new_arrangement.destination).\
-            filter(Arrangement.start_date == new_arrangement.start_date).\
-            filter(Arrangement.end_date == new_arrangement.end_date).\
+        arrangement = db.session.query(Arrangement). \
+            filter(Arrangement.destination == new_arrangement.destination). \
+            filter(Arrangement.start_date == new_arrangement.start_date). \
+            filter(Arrangement.end_date == new_arrangement.end_date). \
             one_or_none()
         return arrangement

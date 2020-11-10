@@ -73,3 +73,17 @@ class CreateArrangementSchema(Schema):
             raise Conflict(
                 description='Price must be positive value'
             )
+
+
+class ArrangementSearchSchema(Schema):
+    start_date = fields.Date(required=False, allow_none=False)
+    destination = fields.String(required=False, allow_none=False)
+    has_travel_guide = fields.Bool(required=False, allow_none=False)
+
+    @validates_schema
+    def validate_numbers(self, data, **kwargs):
+        if data.get('start_date'):
+            if data.get('start_date') < date.today():
+                raise Conflict(
+                    description='Start date can\'t be in the past'
+                )

@@ -25,7 +25,7 @@ class ArrangementAbstractService(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_arrangements_depending_guide(self, has_travel_guide):
+    def search_all_arrangements(self, query_params):
         raise NotImplementedError()
 
     @abstractmethod
@@ -34,4 +34,8 @@ class ArrangementAbstractService(object):
 
     @abstractmethod
     def get_all_guides_with_application(self, arrangement_id):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_reservation(self, arrangement_id, data, tourist_id):
         raise NotImplementedError()

@@ -8,7 +8,7 @@ from flask_app.arrangements_blueprint.services \
 from flask_app.common_blueprint.schemas import \
     CreateArrangementSchema, GetArrangementSchema, UpdateArrangementSchema, \
     ArrangementMinimalSchema, GetApplicationSchema,\
-    GetUserSchema
+    GetUserSchema, ArrangementSearchSchema, ReservationSchema
 from flask_app.common_blueprint.services import GenericService
 
 # schemas
@@ -17,6 +17,8 @@ get_arrangement_schema = GetArrangementSchema()
 update_arrangement_schema = UpdateArrangementSchema()
 arrangement_minimal_schema = ArrangementMinimalSchema(many=True)
 get_user_schema = GetUserSchema(many=True)
+get_search_schema = ArrangementSearchSchema()
+reservation_schema = ReservationSchema()
 
 
 # services
@@ -45,15 +47,9 @@ class ArrangementApi(Resource):
 class ArrangementGuideApi(Resource):
     # getting all arrangements depending on query param travel guide
     def get(self):
-        has_travel_guide = request.args.get('has-travel-guide')
-        if not has_travel_guide:
-            has_travel_guide = False
-        elif has_travel_guide == 'True':
-            has_travel_guide = True
-        else:
-            has_travel_guide = False
-        data = arrangement_service.get_all_arrangements_depending_guide(
-            has_travel_guide=has_travel_guide
+        query_params = get_search_schema.load(request.args)
+        data = arrangement_service.search_all_arrangements(
+            query_params=query_params
         )
         arrangements = GetArrangementSchema(many=True).dump(data)
         return arrangements
@@ -122,3 +118,15 @@ class ArrangementGuides(Resource):
         )
         travel_guides = get_user_schema.dump(data)
         return travel_guides
+
+
+@arrangements_api.route('/<int:id>/reservations/<int:tourist_id>')
+class ArrangementReservationsApi(Resource):
+    def post(self, id, tourist_id):
+        data = reservation_schema.load(request.json)
+        message = arrangement_service.create_reservation(
+            arrangement_id=id,
+            data=data,
+            tourist_id=tourist_id
+        )
+        return message

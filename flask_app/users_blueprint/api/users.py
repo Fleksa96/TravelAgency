@@ -60,7 +60,7 @@ class GuideArrangementsApi(Resource):
 
 @users_api.route('/<int:id>/reservations')
 class ArrangementReservationApi(Resource):
-    # getting tourist reservation arrangements
+    # getting tourist implementation arrangements
     def get(self, id):
         data = user_service.get_all_arrangements_for_tourist(
             tourist_id=id
