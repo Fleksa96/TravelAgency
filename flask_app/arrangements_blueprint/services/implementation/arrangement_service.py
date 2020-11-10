@@ -48,6 +48,13 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         return reservation
 
     @staticmethod
+    def _check_if_arrangement_is_in_future(arrangement):
+        if arrangement.start_date < date.today():
+            raise Conflict(
+                description='Arrangement start date has passed'
+            )
+
+    @staticmethod
     def _check_if_arrangement_has_free_places(arrangement,
                                               number_of_reservations):
         if arrangement.free_places < number_of_reservations:
@@ -290,6 +297,9 @@ class ArrangementService(ArrangementAbstractService, GenericService):
 
     def create_reservation(self, arrangement_id, data, tourist_id):
         arrangement = self.check_if_arrangement_exist(arrangement_id)
+        self._check_if_arrangement_is_in_future(
+            arrangement=arrangement
+        )
         self.check_if_user_is_tourist(tourist_id)
         number_of_reservations = data.get('number_of_reservations')
         self._check_if_arrangement_has_free_places(
