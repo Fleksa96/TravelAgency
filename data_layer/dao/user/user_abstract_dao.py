@@ -39,5 +39,5 @@ class UserAbstractDao(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def update_user_data(self, updated_user, tourist_id):
+    def update_user_data(self, updated_user):
         raise NotImplementedError()

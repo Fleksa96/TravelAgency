@@ -1,5 +1,7 @@
 from data_layer import ArrangementDao, UserDao
 
+from flask_login import current_user
+
 from werkzeug.exceptions import Conflict, NotFound
 
 # daos
@@ -47,6 +49,18 @@ class GenericService:
                 description='Tourist does not exist'
             )
         return user
+
+    @staticmethod
+    def check_if_user_is_admin(admin_id):
+        admin = GenericService.check_if_user_exist(
+            user_id=admin_id
+        )
+        if admin.user_type != 1:
+            raise Conflict(
+                description='User is not admin'
+            )
+        else:
+            return admin
 
     @staticmethod
     def get_all_available_travel_guides(arrangement_id):

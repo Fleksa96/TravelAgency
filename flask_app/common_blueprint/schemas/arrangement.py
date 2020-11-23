@@ -40,6 +40,7 @@ class GetArrangementSchema(Schema):
 class UpdateArrangementSchema(Schema):
     start_date = fields.Date()
     end_date = fields.Date()
+    description = fields.String()
     price = fields.Float()
     free_places = fields.Integer()
     travel_guide_id = fields.Integer()
@@ -52,7 +53,6 @@ class CreateArrangementSchema(Schema):
     destination = fields.String(required=True)
     price = fields.Float(required=True)
     free_places = fields.Integer(required=True)
-    admin_id = fields.Integer(required=True)
     travel_guide_id = fields.Integer()
 
     @validates('start_date')

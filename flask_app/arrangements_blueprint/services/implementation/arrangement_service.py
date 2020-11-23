@@ -1,4 +1,4 @@
-from werkzeug.exceptions import Conflict
+from werkzeug.exceptions import Conflict, Forbidden
 
 from flask_mail import Message
 
@@ -8,6 +8,7 @@ from flask_app import mail
 from flask_app.arrangements_blueprint.services.arrangement_abstract_service \
     import ArrangementAbstractService
 from flask_app.common_blueprint.services import GenericService
+from flask_login import current_user
 
 from data_layer.dao.arrangement.implementation.arrangement_dao \
     import ArrangementDao
@@ -25,8 +26,34 @@ user_dao = UserDao()
 application_dao = ApplicationDao()
 reservation_dao = ReservationDao()
 
+# CONSTANTS
+DESCRIPTION = ['description']
+
 
 class ArrangementService(ArrangementAbstractService, GenericService):
+
+    @staticmethod
+    def _check_if_received_data_is_invalid(keys):
+        if not set(keys).intersection(set(DESCRIPTION)):
+            raise Conflict(
+                description='Guide can only update description'
+            )
+
+    @staticmethod
+    def _check_if_admin_made_arrangement(arrangement):
+        if arrangement.admin_id != current_user.id:
+            raise Conflict(
+                description='Admin can only change arrangements '
+                            'that he created '
+            )
+
+    @staticmethod
+    def _check_if_guide_is_guiding_arrangement(arrangement):
+        if arrangement.travel_guide_id != current_user.id:
+            raise Conflict(
+                description='Travel guide can change description of '
+                            'arrangement only if he is guiding arrangement'
+            )
 
     @staticmethod
     def _check_if_application_already_exist(user_id, arrangement_id):
@@ -45,6 +72,20 @@ class ArrangementService(ArrangementAbstractService, GenericService):
             user_id=user_id,
             arrangement_id=arrangement_id
         )
+        if reservation:
+            raise Conflict(
+                description='Reservation already exists'
+            )
+
+    @staticmethod
+    def _check_if_reservation_exist(reservation_id):
+        reservation = reservation_dao.get_reservation_by_id(
+            reservation_id=reservation_id
+        )
+        if not reservation:
+            raise Conflict(
+                description='Reservation does not exist'
+            )
         return reservation
 
     @staticmethod
@@ -123,15 +164,6 @@ class ArrangementService(ArrangementAbstractService, GenericService):
             )
 
     @staticmethod
-    def _check_if_admin_id_is_current_user_id(user_id):
-        admin = user_dao.get_user_by_id(
-            user_id=user_id
-        )
-        if admin.admin_id != 1:
-            raise Conflict(description='You are not authorized to '
-                                       'update this arrangement!')
-
-    @staticmethod
     def _send_email_of_cancellation(arrangement_id):
         users = arrangement_dao.get_users_from_reservation(
             arrangement_id=arrangement_id
@@ -156,10 +188,17 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         return data
 
     def delete_arrangement(self, arrangement_id):
-        self.check_if_arrangement_exist(
+        arrangement = self.check_if_arrangement_exist(
             arrangement_id=arrangement_id
         )
+        self.check_if_user_is_admin(current_user.id)
+        self._check_if_admin_made_arrangement(
+            arrangement=arrangement
+        )
         self._send_email_of_cancellation(
+            arrangement_id=arrangement_id
+        )
+        reservation_dao.delete_reservations_for_arrangement(
             arrangement_id=arrangement_id
         )
         message = arrangement_dao.delete_arrangement(
@@ -168,6 +207,7 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         return message
 
     def create_arrangement(self, data):
+        self.check_if_user_is_admin(current_user.id)
         new_arrangement = Arrangement(
             start_date=data.get('start_date'),
             end_date=data.get('end_date'),
@@ -175,7 +215,7 @@ class ArrangementService(ArrangementAbstractService, GenericService):
             destination=data.get('destination'),
             price=data.get('price'),
             free_places=data.get('free_places'),
-            admin_id=data.get('admin_id')
+            admin_id=current_user.id
         )
         self._check_if_destination_with_same_dates_exist(
             new_arrangement=new_arrangement
@@ -185,65 +225,86 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         return arrangement
 
     def update_arrangement(self, id, data):
+        if not data:
+            raise Conflict(
+                description="You must send data for update"
+            )
         arrangement = self.check_if_arrangement_exist(
             arrangement_id=id
         )
-
-        if data.get('start_date') and data.get('end_date'):
-            self._check_if_date_is_invalid(
-                first_date=data.get('start_date'),
-                second_date=data.get('end_date'),
-                flag=False
+        if current_user.user_type == 1:
+            self._check_if_admin_made_arrangement(
+                arrangement=arrangement
             )
-            arrangement.start_date = data.get('start_date')
-            arrangement.end_date = data.get('end_date')
-        else:
-            if data.get('end_date'):
+            if data.get('start_date') and data.get('end_date'):
                 self._check_if_date_is_invalid(
-                    first_date=arrangement.start_date,
+                    first_date=data.get('start_date'),
                     second_date=data.get('end_date'),
                     flag=False
                 )
+                arrangement.start_date = data.get('start_date')
                 arrangement.end_date = data.get('end_date')
-            if data.get('start_date'):
-                self._check_if_date_is_invalid(
-                    first_date=date.today(),
-                    second_date=data.get('start_date'),
+            else:
+                if data.get('end_date'):
+                    self._check_if_date_is_invalid(
+                        first_date=arrangement.start_date,
+                        second_date=data.get('end_date'),
+                        flag=False
+                    )
+                    arrangement.end_date = data.get('end_date')
+                if data.get('start_date'):
+                    self._check_if_date_is_invalid(
+                        first_date=date.today(),
+                        second_date=data.get('start_date'),
+                        flag=True
+                    )
+                    self._check_if_date_is_invalid(
+                        first_date=data.get('start_date'),
+                        second_date=arrangement.end_date,
+                        flag=False
+                    )
+                    arrangement.start_date = data.get('start_date')
+            if data.get('free_places'):
+                self._check_if_number_is_positive(
+                    number=data.get('free_places'),
                     flag=True
                 )
-                self._check_if_date_is_invalid(
-                    first_date=data.get('start_date'),
-                    second_date=arrangement.end_date,
+                arrangement.free_places = data.get('free_places')
+            if data.get('price'):
+                self._check_if_number_is_positive(
+                    number=data.get('price'),
                     flag=False
                 )
-                arrangement.start_date = data.get('start_date')
-        if data.get('free_places'):
-            self._check_if_number_is_positive(
-                number=data.get('free_places'),
-                flag=True
+                arrangement.price = data.get('price')
+            # this has to be last check,
+            # because i need to send object arrangement
+            if data.get('travel_guide_id'):
+                user = self.check_if_user_is_guide(
+                    travel_guide_id=data.get('travel_guide_id')
+                )
+                self._check_if_guide_is_available(
+                    arrangement_id=id,
+                    user=user
+                )
+                arrangement.travel_guide_id = data.get('travel_guide_id')
+                self._update_application_status(
+                    user_id=user.id,
+                    arrangement_id=id
+                )
+        elif current_user.user_type == 2:
+            self._check_if_received_data_is_invalid(
+                keys=data.keys()
             )
-            arrangement.free_places = data.get('free_places')
-        if data.get('price'):
-            self._check_if_number_is_positive(
-                number=data.get('price'),
-                flag=False
+            self._check_if_guide_is_guiding_arrangement(
+                arrangement=arrangement
             )
-            arrangement.price = data.get('price')
-        # this has to be last check,
-        # because i need to send object arrangement
-        if data.get('travel_guide_id'):
-            user = self.check_if_user_is_guide(
-                travel_guide_id=data.get('travel_guide_id')
+        else:
+            raise Forbidden(
+                description='Tourist can\'t update arrangement'
             )
-            self._check_if_guide_is_available(
-                arrangement_id=id,
-                user=user
-            )
-            arrangement.travel_guide_id = data.get('travel_guide_id')
-            self._update_application_status(
-                user_id=user.id,
-                arrangement_id=id
-            )
+
+        if data.get('description'):
+            arrangement.description = data.get('description')
 
         arrangement = arrangement_dao.update_arrangement(
             arrangement=arrangement,
@@ -260,7 +321,8 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         return data
 
     def create_application(self, travel_guide_id, arrangement_id):
-        self.check_if_arrangement_exist(arrangement_id)
+        arrangement = self.check_if_arrangement_exist(arrangement_id)
+        self._check_if_arrangement_is_in_future(arrangement)
         user = self.check_if_user_is_guide(travel_guide_id)
         self._check_if_application_already_exist(
             user_id=travel_guide_id,
@@ -286,6 +348,7 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         arrangement = self.check_if_arrangement_exist(
             arrangement_id=arrangement_id
         )
+        self.check_if_user_is_admin(current_user.id)
         available_guides = self.get_all_available_travel_guides(
             arrangement_id=arrangement_id
         )
@@ -300,31 +363,52 @@ class ArrangementService(ArrangementAbstractService, GenericService):
         self._check_if_arrangement_is_in_future(
             arrangement=arrangement
         )
+        self._check_if_reservation_already_exist(
+            arrangement_id=arrangement_id,
+            user_id=tourist_id
+        )
         self.check_if_user_is_tourist(tourist_id)
         number_of_reservations = data.get('number_of_reservations')
         self._check_if_arrangement_has_free_places(
             arrangement=arrangement,
             number_of_reservations=number_of_reservations
         )
-        reservation = self._check_if_reservation_already_exist(
+
+        reservation = Reservation(
+            user_id=tourist_id,
             arrangement_id=arrangement_id,
-            user_id=tourist_id
+            num_of_places=number_of_reservations
         )
-        if reservation is None:
-            reservation = Reservation(
-                user_id=tourist_id,
-                arrangement_id=arrangement_id,
-                num_of_places=number_of_reservations
-            )
-            message = reservation_dao.create_reservation(
-                user_id=tourist_id,
-                arrangement=arrangement,
-                reservation=reservation
-            )
-        else:
-            message = reservation_dao.update_reservation(
+        message = reservation_dao.create_reservation(
+            user_id=tourist_id,
+            arrangement=arrangement,
+            reservation=reservation
+        )
+        return message
+
+    def update_reservation(self,
+                           arrangement_id,
+                           data,
+                           tourist_id,
+                           reservation_id):
+        arrangement = self.check_if_arrangement_exist(arrangement_id)
+        self._check_if_arrangement_is_in_future(
+            arrangement=arrangement
+        )
+        reservation = self._check_if_reservation_exist(
+            reservation_id=reservation_id
+        )
+        self.check_if_user_is_tourist(tourist_id)
+        number_of_reservations = data.get('number_of_reservations')
+        self._check_if_arrangement_has_free_places(
+            arrangement=arrangement,
+            number_of_reservations=number_of_reservations
+        )
+
+        message = reservation_dao.update_reservation(
                 reservation=reservation,
                 arrangement=arrangement,
                 num_of_places=number_of_reservations
             )
+
         return message

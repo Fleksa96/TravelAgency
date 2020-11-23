@@ -77,10 +77,7 @@ class UserDao(UserAbstractDao):
             first()
         return user
 
-    def update_user_data(self, updated_user, user_id):
-        user = db.session.query(User). \
-            filter(User.id == user_id). \
-            first()
+    def update_user_data(self, updated_user):
         user = updated_user
         db.session.commit()
         return user

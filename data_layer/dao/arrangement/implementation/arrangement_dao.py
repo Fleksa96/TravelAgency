@@ -15,11 +15,11 @@ class ArrangementDao(ArrangementAbstractDao):
         users = db.session.query(User,
                                  Arrangement. \
                                  destination.label('destination')). \
-            filter(Reservation.arrangement_id == arrangement_id). \
-            filter(Reservation.user_id == User.id). \
-            filter(Arrangement.is_active.is_(True)). \
-            all()
-        return users
+            join(Reservation, Reservation.arrangement_id == Arrangement.id). \
+            join(User, Reservation.user_id == User.id). \
+            filter(Arrangement.id == arrangement_id). \
+            filter(Arrangement.is_active.is_(True))
+        return users.all()
 
     def get_admin_id_from_arrangement_id(self, arrangement_id):
         arrangement = db.session.query(Arrangement). \
@@ -88,22 +88,13 @@ class ArrangementDao(ArrangementAbstractDao):
 
         return data.all()
 
-    def get_all_arrangements_for_tourist(self, tourist_id):
-        arrangements = db.session.query(Arrangement). \
-            join(Reservation,
-                 Reservation.arrangement_id == Arrangement.id). \
-            filter(Reservation.user_id == tourist_id). \
-            filter(Arrangement.is_active.is_(True)). \
-            all()
-        return arrangements
-
     def get_all_applications_for_travel_guide(self, travel_guide_id):
         arrangement = aliased(Arrangement, name='arrangement')
         data = db.session. \
             query(arrangement,
                   Application.request_status). \
             join(Application,
-                 Application.arrangement_id == Arrangement.id). \
+                 Application.arrangement_id == arrangement.id). \
             filter(arrangement.is_active.is_(True)). \
             filter(Application.user_id == travel_guide_id)
 
@@ -120,5 +111,6 @@ class ArrangementDao(ArrangementAbstractDao):
             filter(Arrangement.destination == new_arrangement.destination). \
             filter(Arrangement.start_date == new_arrangement.start_date). \
             filter(Arrangement.end_date == new_arrangement.end_date). \
+            filter(Arrangement.is_active.is_(True)). \
             one_or_none()
         return arrangement

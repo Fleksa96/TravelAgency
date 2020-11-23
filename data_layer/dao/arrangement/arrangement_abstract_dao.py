@@ -21,10 +21,6 @@ class ArrangementAbstractDao(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_arrangements_for_tourist(self, tourist_id):
-        raise NotImplementedError()
-
-    @abstractmethod
     def get_all_applications_for_travel_guide(self, travel_guide_id):
         raise NotImplementedError()
 
@@ -34,10 +30,6 @@ class ArrangementAbstractDao(object):
 
     @abstractmethod
     def create_arrangement(self, new_arrangement):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def create_reservation(self, arrangement_id, data, tourist_id):
         raise NotImplementedError()
 
     @abstractmethod

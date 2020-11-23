@@ -5,7 +5,11 @@ class UserAbstractService(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def create_new_tourist(self, new_user):
+    def registration_of_new_user(self, post_data):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_new_user(self, post_data, current_user):
         raise NotImplementedError()
 
     @abstractmethod
@@ -29,5 +33,5 @@ class UserAbstractService(object):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_all_arrangements_for_tourist(self, tourist_id):
+    def get_all_reservations_for_tourist(self, tourist_id):
         raise NotImplementedError()

@@ -12,3 +12,11 @@ class ReservationSchema(Schema):
                 description='Number of reservations has to be '
                             'bigger than 0'
             )
+
+
+class GetReservationSchema(Schema):
+    id = fields.Integer(required=True)
+    user_id = fields.Integer(required=True)
+    arrangement_id = fields.Integer(required=True)
+    num_of_places = fields.Integer(required=True)
+    price = fields.Float(required=True)

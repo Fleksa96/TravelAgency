@@ -1,17 +1,42 @@
 from flask_app.users_blueprint.services.user_abstract_service import \
     UserAbstractService
-from data_layer import UserDao, User, ArrangementDao
-
 from flask_app.common_blueprint.services import GenericService
+
+from data_layer import UserDao, User, ArrangementDao, ReservationDao
 
 from werkzeug.exceptions import Conflict
 
 # daos
 user_dao = UserDao()
 arrangement_dao = ArrangementDao()
+reservation_dao = ReservationDao()
+
+USER_TYPE = ['user_type']
 
 
 class UserService(GenericService, UserAbstractService):
+
+    @staticmethod
+    def _make_user(post_data):
+        new_user = User(
+            first_name=post_data.get('first_name'),
+            last_name=post_data.get('last_name'),
+            username=post_data.get('username'),
+            password=post_data.get('password'),
+            email=post_data.get('email'),
+            user_type=post_data.get('user_type')
+        )
+
+        new_user = user_dao.create_user(new_user=new_user)
+        return new_user
+
+    @staticmethod
+    def _check_if_received_data_is_invalid(keys):
+        if set(keys).intersection(set(USER_TYPE)):
+            raise Conflict(
+                description='Only admin can choose user type, '
+                            'default is tourist'
+            )
 
     @staticmethod
     def _check_if_username_is_unique(username):
@@ -46,23 +71,32 @@ class UserService(GenericService, UserAbstractService):
                 description='Password differs from confirmation of password'
             )
 
-    def create_new_tourist(self, post_data):
-        new_user = User(
-            first_name=post_data.get('first_name'),
-            last_name=post_data.get('last_name'),
-            username=post_data.get('username'),
-            password=post_data.get('password'),
-            email=post_data.get('email')
+    def create_new_user(self, post_data, current_user):
+        self.check_if_user_is_admin(current_user.id)
+        self._check_if_username_is_unique(
+            username=post_data.get('username').strip()
+        )
+        self._check_if_email_is_unique(
+            email=post_data.get('email').strip()
+        )
+        new_user = self._make_user(
+            post_data=post_data
+        )
+        return new_user
+
+    def registration_of_new_user(self, post_data):
+        self._check_if_received_data_is_invalid(
+            keys=post_data.keys()
         )
         self._check_if_username_is_unique(
-            username=new_user.username.strip()
+            username=post_data.get('username').strip()
         )
-
         self._check_if_email_is_unique(
-            email=new_user.email.strip()
+            email=post_data.get('email').strip()
         )
-
-        new_user = user_dao.create_user(new_user=new_user)
+        new_user = self._make_user(
+            post_data=post_data
+        )
         return new_user
 
     def login_user(self, data):
@@ -81,12 +115,12 @@ class UserService(GenericService, UserAbstractService):
         )
         return data
 
-    def get_all_arrangements_for_tourist(self, tourist_id):
+    def get_all_reservations_for_tourist(self, tourist_id):
         self.check_if_user_is_tourist(
             tourist_id=tourist_id
         )
-        arrangements = arrangement_dao.get_all_arrangements_for_tourist(
-            tourist_id=tourist_id
+        arrangements = reservation_dao.get_all_reservations_for_tourist(
+            user_id=tourist_id
         )
         return arrangements
 
@@ -100,13 +134,13 @@ class UserService(GenericService, UserAbstractService):
         return data
 
     def get_user_by_id(self, user_id):
-        user = GenericService.check_if_user_exist(
+        user = self.check_if_user_exist(
             user_id=user_id
         )
         return user
 
     def update_user(self, user_id, data):
-        user = GenericService.check_if_user_exist(
+        user = self.check_if_user_exist(
             user_id=user_id
         )
 
@@ -132,8 +166,7 @@ class UserService(GenericService, UserAbstractService):
             user.password = data.get('password')
 
         updated_user = user_dao.update_user_data(
-            updated_user=user,
-            user_id=user_id
+            updated_user=user
         )
         return updated_user
 

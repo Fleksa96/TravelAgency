@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
+from flask_login import UserMixin
 from flask_app import db
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -15,7 +15,6 @@ class User(db.Model):
     user_type = Column(Integer, nullable=True, default=3)
 
     def __init__(self,
-                 id=None,
                  first_name=None,
                  last_name=None,
                  username=None,
@@ -23,7 +22,6 @@ class User(db.Model):
                  email=None,
                  user_type=None
                  ):
-        self.id = id
         self.first_name = first_name
         self.last_name = last_name
         self.username = username

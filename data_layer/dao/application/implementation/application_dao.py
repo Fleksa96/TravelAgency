@@ -29,15 +29,15 @@ class ApplicationDao(ApplicationAbstractDao):
         return application
 
     def update_application_status(self, application, arrangement_id, user_id):
-        if application:
-            application.request_status = ACCEPTED
 
         applications = db.session.query(Application).\
-            filter(Application.user_id != user_id). \
             filter(Application.arrangement_id == arrangement_id). \
             all()
 
         for a in applications:
             a.request_status = DENIED
+
+        if application:
+            application.request_status = ACCEPTED
 
         db.session.commit()

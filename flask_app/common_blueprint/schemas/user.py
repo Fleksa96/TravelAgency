@@ -9,6 +9,23 @@ class CreateUserSchema(Schema):
     password = fields.String(required=True)
     confirm_password = fields.String(required=True)
     email = fields.Email(required=True)
+    user_type = fields.Integer(required=True)
+
+    @validates_schema
+    def validate_numbers(self, data, **kwargs):
+        if data.get("password") != data.get("confirm_password"):
+            raise Conflict(
+                description='Password and confirm password field differs'
+            )
+
+
+class RegistrationUserSchema(Schema):
+    first_name = fields.String(required=True)
+    last_name = fields.String(required=True)
+    username = fields.String(required=True)
+    password = fields.String(required=True)
+    confirm_password = fields.String(required=True)
+    email = fields.Email(required=True)
     user_type = fields.Integer(required=False)
 
     @validates_schema

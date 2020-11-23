@@ -3,6 +3,6 @@ from .arrangement import \
     ArrangementMinimalSchema, GetGuideArrangementSchema, \
     ArrangementSearchSchema
 from .user import UserMinimalSchema, GetUserSchema, UserLoginSchema, \
-    CreateUserSchema, UpdateUserSchema
+    CreateUserSchema, UpdateUserSchema, RegistrationUserSchema
 from .application import GetApplicationSchema
-from .reservation import ReservationSchema
+from .reservation import ReservationSchema, GetReservationSchema

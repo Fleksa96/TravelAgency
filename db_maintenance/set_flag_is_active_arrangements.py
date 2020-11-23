@@ -6,13 +6,16 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from app import app
 from flask_app import db
 from data_layer import Arrangement
+from datetime import date
 
 
 def update_flag_is_active():
-    arrangements = db.session.query(Arrangement).all()
+    arrangements = db.session.query(Arrangement).\
+        filter(Arrangement.end_date < date.today()).\
+        all()
 
     for arrangement in arrangements:
-        arrangement.is_active = True
+        arrangement.is_active = False
 
 
 if __name__ == '__main__':
